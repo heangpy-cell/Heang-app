@@ -504,32 +504,60 @@ class DownloadService {
   // ៤. Facebook — ប្រើ API savefrom.net
   // ────────────────────────────────────────────────
   Future<FetchResult> _fetchFacebook(String url) async {
+    // ── Method 1: yt5s.com API ──
     try {
-      final response = await _dio.get(
-        'https://saveFrom.net/api/convert',
-        queryParameters: {'url': url, 'lang': 'en'},
-        options: Options(headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Referer': 'https://savefrom.net/',
-        }),
+      final response = await _dio.post(
+        'https://yt5s.com/api/ajaxSearch',
+        data: {'q': url, 'vt': 'homevideo'},
+        options: Options(
+          contentType: 'application/x-www-form-urlencoded',
+          headers: {
+            'Referer': 'https://yt5s.com/',
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+          },
+          receiveTimeout: const Duration(seconds: 15),
+        ),
       );
 
       final data = response.data;
-      if (data != null && data['url'] != null) {
-        final urls = data['url'] as List;
-        if (urls.isNotEmpty) {
-          return FetchResult(
-            success: true,
-            directUrl: urls.first['url'],
-            title: data['meta']?['title'] ?? 'Facebook Video',
-            thumbnail: data['meta']?['thumb'],
-          );
+      if (data is Map && data['status'] == 'ok') {
+        final html = data['data']?.toString() ?? '';
+        if (html.isNotEmpty) {
+          final match = RegExp(r'id="vid"[^>]*src="([^"]+)"', caseSensitive: false).firstMatch(html)
+                     ?? RegExp(r'src="([^"]+)"[^>]*id="vid"', caseSensitive: false).firstMatch(html)
+                     ?? RegExp(r'<video[^>]+src="([^"]+)"', caseSensitive: false).firstMatch(html);
+          
+          if (match != null) {
+            final videoUrl = match.group(1)!.replaceAll('&amp;', '&');
+            final titleMatch = RegExp(r'<b class="title"[^>]*>(.*?)</b>', caseSensitive: false).firstMatch(html);
+            final title = titleMatch != null ? titleMatch.group(1)!.trim() : 'Facebook Video';
+            final thumbMatch = RegExp(r'poster="([^"]+)"', caseSensitive: false).firstMatch(html);
+            final thumb = thumbMatch?.group(1);
+
+            return FetchResult(
+              success: true,
+              directUrl: videoUrl,
+              title: title,
+              thumbnail: thumb,
+            );
+          }
         }
       }
-      return FetchResult(success: false, error: 'Facebook: No URL found');
-    } catch (e) {
-      return FetchResult(success: false, error: 'Facebook: $e');
-    }
+    } catch (_) {}
+
+    // ── Method 2: Cobalt fallback ──
+    try {
+      final cobalt = await _fetchByCobalt(url);
+      if (cobalt.success) return cobalt;
+    } catch (_) {}
+
+    return FetchResult(
+      success: false,
+      error: 'Facebook: មិនអាចទាញយកវីដេអូបានឡើយ។\n'
+          'សូមពិនិត្យមើល Link និងព្យាយាមម្ដងទៀត។',
+    );
   }
 
   // ────────────────────────────────────────────────
