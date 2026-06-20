@@ -372,6 +372,9 @@ class DownloadService {
     // ── Layer 3: cobalt.tools v2 REST API ─────────────────────
     // Uses new official spec: POST /
     final cobaltHosts = [
+      'https://fox.kittycat.boo/',
+      'https://api.cobalt.blackcat.sweeux.org/',
+      'https://cobaltapi.cjs.nz/',
       'https://cobalt.tools/',
       'https://api.cobalt.tools/',
       'https://co.lazer.li/',
@@ -1343,6 +1346,9 @@ class DownloadService {
   // ────────────────────────────────────────────────
   Future<FetchResult> _fetchByCobalt(String url) async {
     final cobaltHosts = [
+      'https://fox.kittycat.boo/',
+      'https://api.cobalt.blackcat.sweeux.org/',
+      'https://cobaltapi.cjs.nz/',
       'https://cobalt.tools/',
       'https://api.cobalt.tools/',
       'https://co.lazer.li/',
