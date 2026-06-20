@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to save downloaded videos directly to your Photos app.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need photo library access to save downloaded videos directly to your Photos app.</string>
 </dict>
 </plist>

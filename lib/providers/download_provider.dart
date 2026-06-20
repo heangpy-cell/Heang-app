@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gal/gal.dart';
 import '../models/download_item.dart';
 import '../services/download_service.dart';
 import '../utils/platform_utils.dart';
@@ -156,6 +157,13 @@ class DownloadProvider extends ChangeNotifier {
         item.filePath = filePath;
         item.fileSizeBytes = (item.totalMB * 1024 * 1024).round();
         _cancelTokens.remove(item.id);
+
+        try {
+          await Gal.putVideo(filePath);
+        } catch (galError) {
+          print("Error saving bulk video to gallery: $galError");
+        }
+
         await Future.delayed(const Duration(milliseconds: 300));
         _activeDownloads.remove(item);
         _completedDownloads.insert(0, item);
@@ -255,6 +263,12 @@ class DownloadProvider extends ChangeNotifier {
         item.filePath = filePath;
         item.fileSizeBytes = (item.totalMB * 1024 * 1024).round();
         _cancelTokens.remove(item.id);
+
+        try {
+          await Gal.putVideo(filePath);
+        } catch (galError) {
+          print("Error saving video to gallery: $galError");
+        }
 
         await Future.delayed(const Duration(milliseconds: 500));
         _activeDownloads.remove(item);
