@@ -142,7 +142,7 @@ class DownloadService {
   // ────────────────────────────────────────────────
   Future<TikTokProfileResult> fetchTikTokProfile(
     String profileUrl, {
-    int maxVideos = 50,
+    int maxVideos = 2000,
   }) async {
     final match =
         RegExp(r'tiktok\.com/@([^/?#\s]+)').firstMatch(profileUrl);
@@ -181,7 +181,7 @@ class DownloadService {
           'https://www.tikwm.com/api/user/posts',
           queryParameters: {
             'unique_id': '@$username',
-            'count': 20,
+            'count': 50,
             'cursor': cursor,
             'hd': 1,
           },
@@ -1221,6 +1221,7 @@ class DownloadService {
   // ៦.៤ Telegram — Proxy Fallback
   // ────────────────────────────────────────────────
   Future<FetchResult> _fetchTelegram(String url) async {
+    // ១. ព្យាយាមទាញយកតាម Local Proxy (ប្រសិនបើបើក)
     final proxyResult = await _fetchViaLocalProxy(url);
     if (proxyResult.success) {
       return proxyResult;
@@ -1230,7 +1231,20 @@ class DownloadService {
       return proxyResult;
     }
 
-    // ព្យាយាមទាញយកដោយប្រើ Client-side WebView Extractor (លាក់ខ្លួននៅក្នុង App)
+    // ២. ព្យាយាមទាញយកតាម Cobalt API (លឿន និងផ្ទាល់)
+    try {
+      final cobaltResult = await _fetchByCobalt(url);
+      if (cobaltResult.success) {
+        return FetchResult(
+          success: true,
+          directUrl: cobaltResult.directUrl,
+          title: cobaltResult.title ?? 'Telegram Video',
+          thumbnail: cobaltResult.thumbnail,
+        );
+      }
+    } catch (_) {}
+
+    // ៣. ព្យាយាមទាញយកដោយប្រើ Client-side WebView Extractor (លាក់ខ្លួននៅក្នុង App)
     final extractedUrl = await WebViewExtractorService().extractMediaUrl(url);
     if (extractedUrl != null) {
       return FetchResult(

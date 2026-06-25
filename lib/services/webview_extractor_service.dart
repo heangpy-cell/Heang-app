@@ -161,7 +161,7 @@ class WebViewExtractorService {
     }
 
     try {
-      final userAgent = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36";
+      const userAgent = "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36";
 
       headlessWebView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(url: WebUri(targetUrl)),
@@ -195,9 +195,13 @@ class WebViewExtractorService {
                 try {
                   final mediaUrl = await controller.evaluateJavascript(source: """
                     (function() {
-                      // 1. Check for video inside bubble
-                      var video = document.querySelector('.tgme_widget_message_bubble video');
-                      if (video && video.src) return video.src;
+                      // 1. Check for video inside bubble (and support source elements)
+                      var video = document.querySelector('.tgme_widget_message_bubble video, .tgme_widget_message_video video, .tgme_widget_message_video_player video, video');
+                      if (video) {
+                        if (video.src) return video.src;
+                        var source = video.querySelector('source');
+                        if (source && source.src) return source.src;
+                      }
                       
                       // 2. Check for photo wrap inside bubble
                       var photoEl = document.querySelector('.tgme_widget_message_bubble .tgme_widget_message_photo_wrap');
@@ -276,9 +280,13 @@ class WebViewExtractorService {
             try {
               final mediaUrl = await controller.evaluateJavascript(source: """
                 (function() {
-                  // 1. Check for video inside bubble
-                  var video = document.querySelector('.tgme_widget_message_bubble video');
-                  if (video && video.src) return video.src;
+                  // 1. Check for video inside bubble (and support source elements)
+                  var video = document.querySelector('.tgme_widget_message_bubble video, .tgme_widget_message_video video, .tgme_widget_message_video_player video, video');
+                  if (video) {
+                    if (video.src) return video.src;
+                    var source = video.querySelector('source');
+                    if (source && source.src) return source.src;
+                  }
                   
                   // 2. Check for photo wrap inside bubble
                   var photoEl = document.querySelector('.tgme_widget_message_bubble .tgme_widget_message_photo_wrap');

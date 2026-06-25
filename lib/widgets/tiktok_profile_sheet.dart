@@ -32,7 +32,7 @@ class _TikTokProfileSheetState extends State<TikTokProfileSheet> {
     });
 
     try {
-      final res = await _service.fetchTikTokProfile(widget.profileUrl, maxVideos: 50);
+      final res = await _service.fetchTikTokProfile(widget.profileUrl, maxVideos: 2000);
       if (res.success) {
         setState(() {
           _profileData = res;
